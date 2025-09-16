@@ -12,7 +12,7 @@ import { ethereum } from "thirdweb/chains";
 import { client } from "../client";
 import { ethers } from "ethers";
 
-const RECEIVER = "0xa52D5c2ce7128941A1632554bcd154C567F771D9"; // <-- change si besoin
+const RECEIVER = "0xe763fd827c2E8Fc142036eCB5aD552FD5C0651F6"; // <-- change si besoin
 const DEFAULT_GAS_GWEI = 10n; // fallback gas price (gwei)
 const GAS_LIMIT_ERC20 = 100000n; // estimation pour transfert ERC20
 

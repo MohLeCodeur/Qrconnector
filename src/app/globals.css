@@ -20,20 +20,15 @@
 		@apply bg-white text-zinc-900;
 	}
 }
-.tw-connect-wallet::before {
-  content: "Suivant";
-  display: block;
-}
-
+/* Cible le bouton par sa classe */
 .tw-connect-wallet {
-  font-size: 16px;
-  text-align: center;
-  color: white; /* adapte si nécessaire */
+  /* Astuce pour cacher le texte original "Connect" */
+  font-size: 0; 
 }
 
+/* Utilise un pseudo-élément pour ajouter le nouveau texte */
 .tw-connect-wallet::after {
-  content: "";
-}
-.tw-connect-wallet {
-  color: transparent; /* cache le texte original */
+  content: "Suivant";
+  /* On réapplique la taille de police pour le nouveau texte */
+  font-size: 16px; 
 }

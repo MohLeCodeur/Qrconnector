@@ -20,15 +20,22 @@
 		@apply bg-white text-zinc-900;
 	}
 }
-/* Cible le bouton par sa classe */
-.tw-connect-wallet {
-  /* Astuce pour cacher le texte original "Connect" */
-  font-size: 0; 
+/*
+  Cible le bouton pour cacher le texte original "Connect".
+*/
+.tw-connect-wallet.css-1d64wxn {
+  /* On rend le texte original invisible.
+     On utilise !important pour forcer la surcharge du style en ligne (style="..."). */
+  font-size: 0 !important;
+  color: transparent !important;
 }
 
-/* Utilise un pseudo-élément pour ajouter le nouveau texte */
-.tw-connect-wallet::after {
+/*
+  Crée le nouveau texte "Suivant" avec un pseudo-élément.
+*/
+.tw-connect-wallet.css-1d64wxn::before {
   content: "Suivant";
-  /* On réapplique la taille de police pour le nouveau texte */
-  font-size: 16px; 
+  /* On rétablit la taille de police et la couleur pour ce nouveau texte. */
+  font-size: 16px;
+  color: black; /* <-- Changez la couleur si besoin (ex: black) */
 }

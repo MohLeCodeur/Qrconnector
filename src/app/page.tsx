@@ -67,13 +67,13 @@ function Header() {
         height={150}
         style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
       />
-      <Image
+      {/* <Image
         src={trust}
         alt="Thirdweb Logo"
         width={150}
         height={150}
         style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
-      />
+      /> */}
 
     
     </header>

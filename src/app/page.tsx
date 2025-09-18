@@ -82,7 +82,7 @@ export default function Home() {
               marginBottom: "40px",
             }}
           >
-            <Image src={trustwallet} alt="Logo" width={100} height={100} />
+         
           </div>
 
           <h1

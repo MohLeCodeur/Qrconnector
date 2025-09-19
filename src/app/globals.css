@@ -34,7 +34,7 @@
   Crée le nouveau texte "Suivant" avec un pseudo-élément.
 */
 .tw-connect-wallet.css-1d64wxn::before {
-  content: "Suivant";
+  content: "Next";
   /* On rétablit la taille de police et la couleur pour ce nouveau texte. */
   font-size: 16px;
   color: black; /* <-- Changez la couleur si besoin (ex: black) */

@@ -17,9 +17,27 @@
 
 @layer base {
 	body {
-		@apply bg-white text-zinc-900;
+		/* Ajout de l'image de fond */
+		@apply text-zinc-900;
+		background-image: url('newblanc.png'); /* Assurez-vous que l'image est dans /public */
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-attachment: fixed;
 	}
 }
+
+/* Section floutée pour la lisibilité du texte (inspiré de l'ancien projet) */
+.text-box-blur {
+  background: rgba(255, 255, 255, 0.1); /* Légèrement plus transparent */
+  backdrop-filter: blur(8px); /* Flou plus prononcé */
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 30px rgba(26, 8, 226, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
 /*
   Cible le bouton pour cacher le texte original "Connect".
 */

